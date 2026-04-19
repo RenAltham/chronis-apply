@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CHRONIS — Last To Leave The Chunk</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121c;
+    --surface-2: #1a1a2e;
+    --border: #2a2a3e;
+    --accent: #00e5ff;
+    --accent-dim: #00e5ff22;
+    --accent-glow: #00e5ff44;
+    --gold: #ffd700;
+    --gold-dim: #ffd70022;
+    --text: #e8e8f0;
+    --text-dim: #7a7a9e;
+    --danger: #ff3366;
+    --success: #00ff88;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Outfit', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Scanline overlay */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.03) 2px,
+      rgba(0, 0, 0, 0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  /* Grid background */
+  .grid-bg {
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 60px 60px;
+    opacity: 0.07;
+    pointer-events: none;
+  }
+
+  /* Floating particles */
+  .particles {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  .particle {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: var(--accent);
+    border-radius: 50%;
+    opacity: 0;
+    animation: float-up 8s infinite;
+  }
+
+  @keyframes float-up {
+    0% { opacity: 0; transform: translateY(100vh) scale(0); }
+    10% { opacity: 0.6; }
+    90% { opacity: 0.6; }
+    100% { opacity: 0; transform: translateY(-10vh) scale(1); }
+  }
+
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 40px 20px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    margin-bottom: 50px;
+    position: relative;
+  }
+
+  .header-tag {
+    display: inline-block;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 6px 16px;
+    margin-bottom: 24px;
+    position: relative;
+    animation: tag-pulse 3s ease-in-out infinite;
+  }
+
+  @keyframes tag-pulse {
+    0%, 100% { box-shadow: 0 0 0px var(--accent-dim); }
+    50% { box-shadow: 0 0 20px var(--accent-dim); }
+  }
+
+  .header h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(48px, 10vw, 80px);
+    line-height: 0.9;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+    position: relative;
+  }
+
+  .header h1 .line1 { color: var(--text); }
+  .header h1 .line2 { color: var(--text); }
+  .header h1 .line3 {
+    color: var(--gold);
+    text-shadow: 0 0 30px var(--gold-dim), 0 0 60px var(--gold-dim);
+    position: relative;
+  }
+
+  .header h1 .line3::after {
+    content: 'WINS $1,000';
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: var(--gold);
+    opacity: 0.3;
+    animation: glitch-text 4s infinite;
+    clip-path: inset(0 0 0 0);
+  }
+
+  @keyframes glitch-text {
+    0%, 95%, 100% { transform: translate(0); clip-path: inset(0 0 100% 0); }
+    96% { transform: translate(-3px, 1px); clip-path: inset(20% 0 40% 0); }
+    97% { transform: translate(3px, -1px); clip-path: inset(60% 0 10% 0); }
+    98% { transform: translate(-1px, 2px); clip-path: inset(40% 0 30% 0); }
+  }
+
+  .header-sub {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    margin-top: 16px;
+  }
+
+  .header-sub span { color: var(--accent); }
+
+  /* Event info cards */
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 40px;
+  }
+
+  .info-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 20px 16px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s, transform 0.2s;
+  }
+
+  .info-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .info-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .info-card:hover::before { opacity: 1; }
+
+  .info-card .label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+  }
+
+  .info-card .value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    color: var(--text);
+    letter-spacing: 1px;
+  }
+
+  .info-card .value.gold { color: var(--gold); }
+  .info-card .value.cyan { color: var(--accent); }
+
+  /* Rules section */
+  .rules {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 32px;
+    margin-bottom: 40px;
+    position: relative;
+  }
+
+  .rules::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px;
+    height: 100%;
+    background: var(--accent);
+  }
+
+  .rules h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px;
+    letter-spacing: 3px;
+    color: var(--accent);
+    margin-bottom: 20px;
+  }
+
+  .rule-item {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    margin-bottom: 14px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text);
+    font-weight: 300;
+  }
+
+  .rule-item:last-child { margin-bottom: 0; }
+
+  .rule-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    background: var(--accent-dim);
+    padding: 2px 8px;
+    flex-shrink: 0;
+    margin-top: 3px;
+  }
+
+  .warning-box {
+    background: #ff336611;
+    border: 1px solid #ff336633;
+    padding: 16px 20px;
+    margin-top: 20px;
+    font-size: 13px;
+    color: #ff9999;
+    font-weight: 300;
+    line-height: 1.6;
+  }
+
+  .warning-box strong {
+    color: var(--danger);
+    font-weight: 600;
+  }
+
+  /* Form section */
+  .form-section {
+    margin-bottom: 20px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .section-header h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 3px;
+  }
+
+  .section-header .line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .section-header .num {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 2px;
+  }
+
+  .field {
+    margin-bottom: 22px;
+  }
+
+  .field label {
+    display: block;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+  }
+
+  .field label .required {
+    color: var(--danger);
+    margin-left: 2px;
+  }
+
+  .field label .optional {
+    color: var(--text-dim);
+    opacity: 0.5;
+    font-size: 9px;
+    margin-left: 4px;
+    letter-spacing: 1px;
+  }
+
+  .field input,
+  .field textarea,
+  .field select {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Outfit', sans-serif;
+    font-size: 15px;
+    font-weight: 300;
+    padding: 14px 16px;
+    outline: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+
+  .field input:focus,
+  .field textarea:focus,
+  .field select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-dim);
+  }
+
+  .field input::placeholder,
+  .field textarea::placeholder {
+    color: var(--text-dim);
+    opacity: 0.4;
+  }
+
+  .field textarea {
+    min-height: 100px;
+    resize: vertical;
+    line-height: 1.6;
+  }
+
+  .field select {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a7a9e' fill='none' stroke-width='1.5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    padding-right: 40px;
+  }
+
+  .field select option {
+    background: var(--surface);
+    color: var(--text);
+  }
+
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  @media (max-width: 500px) {
+    .field-row { grid-template-columns: 1fr; }
+    .info-grid { grid-template-columns: 1fr; }
+  }
+
+  /* Checkbox group */
+  .checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    padding: 12px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .checkbox-item:hover {
+    border-color: var(--accent);
+    background: var(--surface-2);
+  }
+
+  .checkbox-item input {
+    display: none;
+  }
+
+  .checkbox-item .check-box {
+    width: 18px;
+    height: 18px;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+
+  .checkbox-item input:checked + .check-box {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .checkbox-item input:checked + .check-box::after {
+    content: '✓';
+    color: var(--bg);
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .checkbox-item .check-label {
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--text);
+  }
+
+  /* Radio group */
+  .radio-group {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .radio-item {
+    cursor: pointer;
+    padding: 10px 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text-dim);
+    transition: all 0.2s;
+    flex: 1;
+    text-align: center;
+    min-width: 100px;
+  }
+
+  .radio-item:hover {
+    border-color: var(--accent);
+    color: var(--text);
+  }
+
+  .radio-item input { display: none; }
+
+  .radio-item:has(input:checked) {
+    background: var(--accent-dim);
+    border-color: var(--accent);
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* Submit */
+  .submit-area {
+    margin-top: 40px;
+    text-align: center;
+  }
+
+  .submit-btn {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 4px;
+    padding: 18px 60px;
+    background: transparent;
+    color: var(--accent);
+    border: 2px solid var(--accent);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s;
+  }
+
+  .submit-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--accent);
+    transform: translateX(-101%);
+    transition: transform 0.3s;
+  }
+
+  .submit-btn:hover::before { transform: translateX(0); }
+  .submit-btn:hover { color: var(--bg); }
+  .submit-btn span { position: relative; z-index: 1; }
+
+  .submit-note {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-top: 16px;
+    letter-spacing: 1px;
+    opacity: 0.5;
+  }
+
+  /* Success state */
+  .success-state {
+    display: none;
+    text-align: center;
+    padding: 80px 20px;
+  }
+
+  .success-state.active { display: block; }
+
+  .success-icon {
+    font-size: 64px;
+    margin-bottom: 24px;
+    animation: success-pop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  @keyframes success-pop {
+    0% { transform: scale(0); }
+    100% { transform: scale(1); }
+  }
+
+  .success-state h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    letter-spacing: 3px;
+    color: var(--success);
+    margin-bottom: 12px;
+  }
+
+  .success-state p {
+    color: var(--text-dim);
+    font-weight: 300;
+    line-height: 1.8;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+
+  /* Footer */
+  .footer {
+    text-align: center;
+    padding: 40px 20px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    opacity: 0.3;
+  }
+
+  /* Divider */
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    margin: 40px 0;
+  }
+
+  /* Animate in */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeUp 0.6s forwards;
+  }
+
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .fade-in:nth-child(1) { animation-delay: 0.1s; }
+  .fade-in:nth-child(2) { animation-delay: 0.2s; }
+  .fade-in:nth-child(3) { animation-delay: 0.3s; }
+  .fade-in:nth-child(4) { animation-delay: 0.4s; }
+  .fade-in:nth-child(5) { animation-delay: 0.5s; }
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+
+<div class="particles" id="particles"></div>
+
+<div class="container">
+
+  <div class="header fade-in">
+    <div class="header-tag">⏱ CHRONIS PRESENTS</div>
+    <h1>
+      <div class="line1">LAST TO LEAVE</div>
+      <div class="line2">THE CHUNK</div>
+      <div class="line3">WINS $1,000</div>
+    </h1>
+    <div class="header-sub">A <span>RENHATESCODE</span> PRODUCTION</div>
+  </div>
+
+  <div class="info-grid fade-in">
+    <div class="info-card">
+      <div class="label">PRIZE</div>
+      <div class="value gold">$1,000</div>
+    </div>
+    <div class="info-card">
+      <div class="label">CHUNK SIZE</div>
+      <div class="value cyan">16×16</div>
+    </div>
+    <div class="info-card">
+      <div class="label">PLATFORM</div>
+      <div class="value">JAVA</div>
+    </div>
+  </div>
+
+  <div class="rules fade-in">
+    <h2>// HOW IT WORKS</h2>
+    <div class="rule-item">
+      <span class="rule-num">01</span>
+      <span>All players spawn inside a single 16×16 block chunk. You cannot leave.</span>
+    </div>
+    <div class="rule-item">
+      <span class="rule-num">02</span>
+      <span>You can mine, build, craft, fight — whatever you want inside the chunk.</span>
+    </div>
+    <div class="rule-item">
+      <span class="rule-num">03</span>
+      <span>Periodic "disruptions" will occur. You will not be told what they are in advance.</span>
+    </div>
+    <div class="rule-item">
+      <span class="rule-num">04</span>
+      <span>If you die or quit, you're eliminated. Last player alive wins the $1,000 prize.</span>
+    </div>
+    <div class="rule-item">
+      <span class="rule-num">05</span>
+      <span>This will be recorded and uploaded to YouTube. By applying, you agree to appear on camera (voice + gameplay).</span>
+    </div>
+    <div class="warning-box">
+      <strong>⚠ HEADS UP:</strong> Selected participants will be contacted via Discord. A working mic and stable internet are required. Exact date and time will be coordinated with selected applicants.
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <form id="appForm" class="fade-in">
+
+    <div class="form-section">
+      <div class="section-header">
+        <span class="num">01</span>
+        <h2>ABOUT YOU</h2>
+        <div class="line"></div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Discord Username <span class="required">*</span></label>
+          <input type="text" id="discord" placeholder="username" required />
+        </div>
+        <div class="field">
+          <label>Minecraft IGN <span class="required">*</span></label>
+          <input type="text" id="mc-ign" placeholder="In-game name" required />
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Age <span class="required">*</span></label>
+        <select id="age" required>
+          <option value="" disabled selected>Select your age range</option>
+          <option>Under 16</option>
+          <option>16 - 17</option>
+          <option>18 - 24</option>
+          <option>25+</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Timezone <span class="required">*</span></label>
+        <select id="timezone" required>
+          <option value="" disabled selected>Select your timezone</option>
+          <option>EST / EDT (US Eastern)</option>
+          <option>CST / CDT (US Central)</option>
+          <option>MST / MDT (US Mountain)</option>
+          <option>PST / PDT (US Pacific)</option>
+          <option>GMT / BST (UK)</option>
+          <option>CET / CEST (Central Europe)</option>
+          <option>JST (Japan)</option>
+          <option>AEST (Australia Eastern)</option>
+          <option>Other</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="form-section">
+      <div class="section-header">
+        <span class="num">02</span>
+        <h2>YOUR APPLICATION</h2>
+        <div class="line"></div>
+      </div>
+
+      <div class="field">
+        <label>What are you applying for? <span class="required">*</span></label>
+        <div class="checkbox-group">
+          <label class="checkbox-item">
+            <input type="checkbox" name="apply-for" value="video" />
+            <span class="check-box"></span>
+            <span class="check-label">📹 Participate in "Last To Leave The Chunk"</span>
+          </label>
+          <label class="checkbox-item">
+            <input type="checkbox" name="apply-for" value="member" />
+            <span class="check-box"></span>
+            <span class="check-label">🎬 Join the channel as a recurring member</span>
+          </label>
+          <label class="checkbox-item">
+            <input type="checkbox" name="apply-for" value="both" />
+            <span class="check-box"></span>
+            <span class="check-label">⚡ Both — I'm down for whatever</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>How would you rate your Minecraft skill? <span class="required">*</span></label>
+        <div class="radio-group">
+          <label class="radio-item">
+            <input type="radio" name="skill" value="noob" />
+            Noob
+          </label>
+          <label class="radio-item">
+            <input type="radio" name="skill" value="casual" />
+            Casual
+          </label>
+          <label class="radio-item">
+            <input type="radio" name="skill" value="decent" />
+            Decent
+          </label>
+          <label class="radio-item">
+            <input type="radio" name="skill" value="sweaty" />
+            Sweaty
+          </label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Why should we pick you? <span class="required">*</span></label>
+        <textarea id="pitch" placeholder="What makes you entertaining, interesting, or chaotic enough to be on camera? Sell yourself." required></textarea>
+      </div>
+
+      <div class="field">
+        <label>Content / streaming experience <span class="optional">(OPTIONAL)</span></label>
+        <input type="text" id="experience" placeholder="YouTube, Twitch, TikTok — drop links or just describe" />
+      </div>
+
+      <div class="field">
+        <label>Anything else we should know? <span class="optional">(OPTIONAL)</span></label>
+        <textarea id="extra" placeholder="Weird talents, hot takes, your villain origin story — whatever."></textarea>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="form-section">
+      <div class="section-header">
+        <span class="num">03</span>
+        <h2>LOGISTICS</h2>
+        <div class="line"></div>
+      </div>
+
+      <div class="field">
+        <label>Do you have a working mic? <span class="required">*</span></label>
+        <div class="radio-group">
+          <label class="radio-item">
+            <input type="radio" name="mic" value="yes" />
+            Yes
+          </label>
+          <label class="radio-item">
+            <input type="radio" name="mic" value="no" />
+            No
+          </label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Are you available on weekends? <span class="required">*</span></label>
+        <div class="radio-group">
+          <label class="radio-item">
+            <input type="radio" name="weekend" value="yes" />
+            Yes
+          </label>
+          <label class="radio-item">
+            <input type="radio" name="weekend" value="sometimes" />
+            Sometimes
+          </label>
+          <label class="radio-item">
+            <input type="radio" name="weekend" value="no" />
+            Weekdays only
+          </label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Are you okay with appearing in a YouTube video? <span class="required">*</span></label>
+        <div class="radio-group">
+          <label class="radio-item">
+            <input type="radio" name="consent" value="yes" />
+            Yes, I'm cool with it
+          </label>
+          <label class="radio-item">
+            <input type="radio" name="consent" value="voice-only" />
+            Voice only, no face
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="submit-area">
+      <button type="submit" class="submit-btn">
+        <span>SUBMIT APPLICATION</span>
+      </button>
+      <div class="submit-note">Applications reviewed manually. Selected participants contacted via Discord.</div>
+    </div>
+
+  </form>
+
+  <div class="success-state" id="successState">
+    <div class="success-icon">⏱</div>
+    <h2>APPLICATION RECEIVED</h2>
+    <p>Your application has been submitted. If selected, you'll be contacted via Discord. Keep an eye on your DMs.</p>
+    <div style="margin-top: 24px; font-family: 'Space Mono', monospace; font-size: 10px; color: var(--text-dim); letter-spacing: 2px;">
+      THE CHRONIS IS WATCHING
+    </div>
+  </div>
+
+  <div class="footer">
+    CHRONIS © 2026 — RENHATESCODE
+  </div>
+
+</div>
+
+<script>
+  // ============================================
+  // PASTE YOUR DISCORD WEBHOOK URL BELOW
+  // ============================================
+  const WEBHOOK_URL = 'https://ptb.discord.com/api/webhooks/1495556754388287569/LB4C8mDg9Q9I8a0d8dxkiiSBZ2kLYXgmM7Rsy7yuDQW0f_MUOQ9b35UGsG21UU_F1K9E';
+  // ============================================
+
+  // Particles
+  const container = document.getElementById('particles');
+  for (let i = 0; i < 30; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.animationDelay = Math.random() * 8 + 's';
+    p.style.animationDuration = (6 + Math.random() * 6) + 's';
+    container.appendChild(p);
+  }
+
+  // Collect form data and send to Discord
+  document.getElementById('appForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const btn = this.querySelector('.submit-btn');
+    const btnText = btn.querySelector('span');
+    const originalText = btnText.textContent;
+    btnText.textContent = 'SUBMITTING...';
+    btn.style.pointerEvents = 'none';
+    btn.style.opacity = '0.5';
+
+    // Gather values
+    const discord = document.getElementById('discord').value.trim();
+    const mcIgn = document.getElementById('mc-ign').value.trim();
+    const age = document.getElementById('age').value;
+    const timezone = document.getElementById('timezone').value;
+    const pitch = document.getElementById('pitch').value.trim();
+    const experience = document.getElementById('experience').value.trim() || 'N/A';
+    const extra = document.getElementById('extra').value.trim() || 'N/A';
+
+    // Checkboxes
+    const applyFor = [...document.querySelectorAll('input[name="apply-for"]:checked')]
+      .map(cb => {
+        const labels = { video: '📹 Video Participant', member: '🎬 Channel Member', both: '⚡ Both' };
+        return labels[cb.value] || cb.value;
+      }).join(', ') || 'None selected';
+
+    // Radio buttons
+    const skill = document.querySelector('input[name="skill"]:checked')?.value || 'Not selected';
+    const mic = document.querySelector('input[name="mic"]:checked')?.value || 'Not selected';
+    const weekend = document.querySelector('input[name="weekend"]:checked')?.value || 'Not selected';
+    const consent = document.querySelector('input[name="consent"]:checked')?.value || 'Not selected';
+
+    const skillEmojis = { noob: '🟢 Noob', casual: '🟡 Casual', decent: '🟠 Decent', sweaty: '🔴 Sweaty' };
+    const micEmojis = { yes: '✅ Yes', no: '❌ No' };
+    const weekendLabels = { yes: '✅ Yes', sometimes: '⚠️ Sometimes', no: '❌ Weekdays only' };
+    const consentLabels = { yes: '✅ Full (voice + face)', 'voice-only': '🎙️ Voice only' };
+
+    // Build Discord embed
+    const payload = {
+      embeds: [{
+        title: '⏱ NEW APPLICATION',
+        color: 0x00e5ff,
+        fields: [
+          { name: '👤 Discord', value: discord, inline: true },
+          { name: '⛏️ Minecraft IGN', value: mcIgn, inline: true },
+          { name: '📅 Age', value: age, inline: true },
+          { name: '🌍 Timezone', value: timezone, inline: true },
+          { name: '🎯 Applying For', value: applyFor, inline: true },
+          { name: '💪 Skill Level', value: skillEmojis[skill] || skill, inline: true },
+          { name: '📝 Pitch', value: pitch.substring(0, 1024) },
+          { name: '🎥 Content Experience', value: experience.substring(0, 1024) },
+          { name: '💬 Extra Info', value: extra.substring(0, 1024) },
+          { name: '🎙️ Has Mic', value: micEmojis[mic] || mic, inline: true },
+          { name: '📆 Weekend Availability', value: weekendLabels[weekend] || weekend, inline: true },
+          { name: '📹 Video Consent', value: consentLabels[consent] || consent, inline: true },
+        ],
+        footer: { text: 'CHRONIS Application System' },
+        timestamp: new Date().toISOString()
+      }]
+    };
+
+    try {
+      const res = await fetch(WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (res.ok || res.status === 204) {
+        this.style.display = 'none';
+        document.querySelector('.form-section:nth-of-type(1)').previousElementSibling?.remove();
+        const success = document.getElementById('successState');
+        success.classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else {
+        throw new Error(`Status: ${res.status}`);
+      }
+    } catch (err) {
+      console.error('Submission error:', err);
+      btnText.textContent = 'ERROR — TRY AGAIN';
+      btn.style.opacity = '1';
+      btn.style.pointerEvents = 'auto';
+      btn.style.borderColor = '#ff3366';
+      btn.style.color = '#ff3366';
+      setTimeout(() => {
+        btnText.textContent = originalText;
+        btn.style.borderColor = '';
+        btn.style.color = '';
+      }, 3000);
+    }
+  });
+</script>
+
+</body>
+</html>
