@@ -5,6 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CHRONIS — Timeborne Interactive</title>
 <meta name="description" content="The Chronis Game Series by Timeborne Interactive. Where every timeline converges.">
+<meta property="og:title" content="CHRONIS — Timeborne Interactive">
+<meta property="og:description" content="An original multiverse game franchise. Detective Amelia Watson searches for a way to revive her friend across infinite timelines.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://renaltham.github.io/chronis/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#ffd700">
+<meta property="og:title" content="CHRONIS — Timeborne Interactive">
+<meta property="og:description" content="The Chronis Game Series. An original multiverse franchise following detective Amelia Watson across infinite timelines. Built in Unreal Engine 5.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://renaltham.github.io/chronis/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#ffd700">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@300;400;500;700&family=Sora:wght@100;200;300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -194,6 +206,75 @@ footer{padding:80px 48px 40px;text-align:center;position:relative;z-index:1;bord
 
 /* ============ SEPARATOR ============ */
 .sep{max-width:1200px;margin:0 auto;padding:0 48px}.sep-line{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent)}
+
+/* ============ TEXT CRAWL ============ */
+.crawl-section{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;z-index:1;perspective:600px;overflow:hidden;padding:80px 24px}
+.crawl-inner{text-align:center;transform:rotateX(18deg);transform-origin:50% 100%;animation:crawl-scroll 70s linear infinite}
+@keyframes crawl-scroll{0%{transform:rotateX(18deg) translateY(50%)}100%{transform:rotateX(18deg) translateY(-200%)}}
+.crawl-line{font-family:'Cormorant Garamond',serif;font-size:clamp(26px,4vw,40px);font-weight:300;font-style:italic;color:var(--text-dim);line-height:3;opacity:.7}
+.crawl-line.gold{color:var(--gold);font-weight:400;opacity:1;font-size:clamp(30px,4.5vw,44px)}
+
+/* ============ COUNTDOWN ============ */
+.countdown-section{padding:80px 48px;text-align:center;position:relative;z-index:1}
+.cd-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:5px;color:var(--cyan);margin-bottom:16px;text-transform:uppercase}
+.cd-event{font-family:'Orbitron',sans-serif;font-size:clamp(18px,3vw,26px);font-weight:700;letter-spacing:3px;color:var(--gold);margin-bottom:32px}
+.cd-grid{display:flex;justify-content:center;gap:24px;flex-wrap:wrap}
+.cd-unit{background:var(--surface);border:1px solid var(--border);padding:20px 28px;min-width:100px;backdrop-filter:blur(8px)}
+.cd-num{font-family:'Orbitron',sans-serif;font-size:clamp(28px,5vw,42px);font-weight:800;color:var(--gold-bright);line-height:1}
+.cd-txt{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:3px;color:var(--text-muted);margin-top:8px;text-transform:uppercase}
+
+/* ============ AMBIENT PLAYER ============ */
+.ambient-toggle{position:fixed;bottom:20px;right:20px;z-index:99;display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--text-muted);padding:10px 16px;background:rgba(3,3,10,.9);backdrop-filter:blur(12px);border:1px solid var(--border);cursor:pointer;transition:all .3s}
+.ambient-toggle:hover{border-color:var(--gold);color:var(--gold)}
+.ambient-toggle.playing{border-color:var(--cyan);color:var(--cyan)}
+.ambient-toggle .wave{display:flex;align-items:end;gap:2px;height:12px}
+.ambient-toggle .wave span{width:2px;background:currentColor;border-radius:1px;animation:none;transition:height .3s}
+.ambient-toggle.playing .wave span{animation:wave-bar .8s ease-in-out infinite alternate}
+.ambient-toggle.playing .wave span:nth-child(1){animation-delay:0s;height:4px}
+.ambient-toggle.playing .wave span:nth-child(2){animation-delay:.15s;height:8px}
+.ambient-toggle.playing .wave span:nth-child(3){animation-delay:.3s;height:12px}
+.ambient-toggle.playing .wave span:nth-child(4){animation-delay:.45s;height:6px}
+@keyframes wave-bar{0%{height:3px}100%{height:12px}}
+
+/* ============ PAGE TRANSITION ============ */
+.page-transition{position:fixed;inset:0;z-index:9997;background:var(--bg);pointer-events:none;opacity:0;transition:opacity .3s}
+.page-transition.flash{opacity:1;animation:page-flash .5s forwards}
+@keyframes page-flash{0%{opacity:1}30%{opacity:1}100%{opacity:0}}
+
+/* ============ PARALLAX DEPTH ============ */
+.parallax-slow{will-change:transform;transition:transform .1s linear}
+
+/* ============ AMBIENT PLAYER ============ */
+.ambient-player{position:fixed;bottom:20px;right:20px;z-index:99;display:flex;align-items:center;gap:10px;background:rgba(3,3,10,.9);backdrop-filter:blur(12px);border:1px solid var(--border);padding:10px 16px;transition:all .3s;cursor:pointer}
+.ambient-player:hover{border-color:var(--gold)}
+.ambient-bars{display:flex;gap:2px;align-items:flex-end;height:16px}
+.ambient-bar{width:3px;background:var(--gold);border-radius:1px;transition:height .2s}
+.ambient-player.playing .ambient-bar{animation:bar-dance .6s ease-in-out infinite alternate}
+.ambient-bar:nth-child(1){animation-delay:0s}.ambient-bar:nth-child(2){animation-delay:.15s}.ambient-bar:nth-child(3){animation-delay:.3s}.ambient-bar:nth-child(4){animation-delay:.1s}.ambient-bar:nth-child(5){animation-delay:.25s}
+@keyframes bar-dance{0%{height:4px}100%{height:16px}}
+.ambient-player:not(.playing) .ambient-bar{height:4px!important;animation:none!important}
+.ambient-label{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--text-dim)}
+
+/* ============ VISITOR COUNTER ============ */
+.observer-count{position:fixed;bottom:20px;left:20px;z-index:99;background:rgba(3,3,10,.9);backdrop-filter:blur(12px);border:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;gap:8px}
+.observer-dot{width:6px;height:6px;background:var(--green);border-radius:50%;animation:pulse-dot 2s infinite}
+.observer-text{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--text-dim)}
+.observer-text span{color:var(--green)}
+
+/* ============ PAGE TRANSITION ============ */
+.page-transition{position:fixed;inset:0;z-index:99999;background:var(--bg);pointer-events:none;opacity:0;transition:opacity .3s}
+.page-transition.active{opacity:1;pointer-events:all}
+.page-transition .glitch-bar{position:absolute;left:0;right:0;height:3px;background:var(--gold);opacity:.6}
+
+/* ============ PARALLAX SECTIONS ============ */
+.lore-card,.game-row,.team-card,.cta-banner{transition:all .4s cubic-bezier(.16,1,.3,1)}
+
+/* ============ SMOOTH SCROLL REVEALS ============ */
+.rv{opacity:0;transform:translateY(50px);transition:opacity 1s cubic-bezier(.16,1,.3,1),transform 1s cubic-bezier(.16,1,.3,1)}
+.rv.vis{opacity:1;transform:translateY(0)}
+.rv-d1{transition-delay:.15s}.rv-d2{transition-delay:.3s}.rv-d3{transition-delay:.45s}.rv-d4{transition-delay:.6s}
+
+@media(max-width:768px){.ambient-player,.observer-count{display:none}}
 </style>
 </head>
 <body>
@@ -213,6 +294,16 @@ footer{padding:80px 48px 40px;text-align:center;position:relative;z-index:1;bord
 <canvas id="bgCanvas"></canvas>
 <div class="grain"></div>
 <div class="scanlines"></div>
+<div class="page-transition" id="pageTransition"></div>
+
+<!-- AMBIENT PLAYER -->
+<div class="ambient-toggle" id="ambientToggle" onclick="toggleAmbient()">
+  <div class="wave"><span></span><span></span><span></span><span></span></div>
+  <span id="ambientLabel">AMBIENT</span>
+</div>
+
+<!-- PAGE TRANSITION -->
+<div class="page-transition" id="pageTransition"></div>
 
 <!-- NAV -->
 <nav id="navbar">
@@ -222,9 +313,10 @@ footer{padding:80px 48px 40px;text-align:center;position:relative;z-index:1;bord
     <li><a href="#lore" onclick="cm()">Lore</a></li>
     <li><a href="#games" onclick="cm()">Games</a></li>
     <li><a href="#team" onclick="cm()">Team</a></li>
-    <li><a href="#content" onclick="cm()">Content</a></li>
-    <li><a href="#community" onclick="cm()">Community</a></li>
+    <li><a href="roadmap.html" onclick="cm()">Roadmap</a></li>
     <li><a href="dossier.html" onclick="cm()" style="color:var(--red)">Dossier</a></li>
+    <li><a href="faq.html" onclick="cm()">FAQ</a></li>
+    <li><a href="press.html" onclick="cm()">Press</a></li>
   </ul>
   <a href="apply.html" class="nav-cta">APPLY</a>
 </nav>
@@ -248,6 +340,24 @@ footer{padding:80px 48px 40px;text-align:center;position:relative;z-index:1;bord
   </div>
   <div class="hero-scroll"><span>SCROLL</span><div class="scroll-arrow"></div></div>
 </section>
+
+<!-- ======== CINEMATIC TEXT CRAWL ======== -->
+<div class="crawl-section">
+  <div class="crawl-inner">
+    <div class="crawl-line">In the beginning, there were the Avatars.</div>
+    <div class="crawl-line">Each one a pillar of existence — Time, Space, Civilization, and more.</div>
+    <div class="crawl-line">They held reality together. Separately. Independently.</div>
+    <div class="crawl-line">But infinity has weight. And the multiverse was breaking.</div>
+    <div class="crawl-line gold">They merged their Cores. The Chronis was born.</div>
+    <div class="crawl-line">One artifact to govern all realities. All timelines. All dimensions.</div>
+    <div class="crawl-line">It controls everything — except Chaos.</div>
+    <div class="crawl-line">And then came The Great Coincidence.</div>
+    <div class="crawl-line gold">Every Amelia. Every Sherry. Infinite connections.</div>
+    <div class="crawl-line">The universe could not hold the weight of how much she mattered.</div>
+    <div class="crawl-line">Sherry Locke died. Everywhere. In every when.</div>
+    <div class="crawl-line gold">But Amelia Watson will not stop searching.</div>
+  </div>
+</div>
 
 <!-- ======== LORE ======== -->
 <div class="sep"><div class="sep-line"></div></div>
@@ -339,10 +449,23 @@ footer{padding:80px 48px 40px;text-align:center;position:relative;z-index:1;bord
   </div>
 </section>
 
+<!-- ======== COUNTDOWN ======== -->
+<div class="sep"><div class="sep-line"></div></div>
+<div class="countdown-section rv">
+  <div class="cd-label">NEXT DROP</div>
+  <div class="cd-event">SOMETHING IS COMING</div>
+  <div class="cd-grid">
+    <div class="cd-unit"><div class="cd-num" id="cdDays">--</div><div class="cd-txt">Days</div></div>
+    <div class="cd-unit"><div class="cd-num" id="cdHours">--</div><div class="cd-txt">Hours</div></div>
+    <div class="cd-unit"><div class="cd-num" id="cdMins">--</div><div class="cd-txt">Minutes</div></div>
+    <div class="cd-unit"><div class="cd-num" id="cdSecs">--</div><div class="cd-txt">Seconds</div></div>
+  </div>
+</div>
+
 <!-- FOOTER -->
 <footer>
   <div class="footer-brand">TIMEBORNE INTERACTIVE</div>
-  <div class="footer-links"><a href="#lore">Lore</a><a href="#games">Games</a><a href="#team">Team</a><a href="https://www.youtube.com/@ChronisGames" target="_blank">YouTube</a><a href="https://discord.com/invite/chronis" target="_blank">Discord</a><a href="apply.html">Apply</a></div>
+  <div class="footer-links"><a href="#lore">Lore</a><a href="#games">Games</a><a href="#team">Team</a><a href="roadmap.html">Roadmap</a><a href="dossier.html">Dossier</a><a href="faq.html">FAQ</a><a href="press.html">Press</a><a href="merch.html">Merch</a><a href="https://www.youtube.com/@ChronisGames" target="_blank">YouTube</a><a href="https://discord.com/invite/chronis" target="_blank">Discord</a><a href="apply.html">Apply</a></div>
   <div class="footer-meta">© 2026 TIMEBORNE INTERACTIVE — ALL TIMELINES RESERVED<br>BUILT WITH UNREAL ENGINE 5</div>
   <div class="footer-binary" title="What does this mean?">01010011 01001000 01000101 01010010 01010010 01011001 00100000 01001001 01010011 00100000 01001100 01001001 01010011 01010100 01000101 01001110 01001001 01001110 01000111</div>
 </footer>
@@ -431,6 +554,64 @@ function cm(){document.querySelector('.nav-links').classList.remove('open')}
 // ===== REVEAL =====
 const obs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('vis')}),{threshold:.1});
 document.querySelectorAll('.rv').forEach(r=>obs.observe(r));
+
+// ===== AMBIENT AUDIO =====
+let ambientCtx, ambientOsc, ambientGain, ambientPlaying=false;
+function toggleAmbient(){
+  if(!ambientCtx){
+    ambientCtx=new(window.AudioContext||window.webkitAudioContext)();
+    // Deep drone
+    ambientOsc=ambientCtx.createOscillator();ambientOsc.type='sine';ambientOsc.frequency.value=55;
+    const osc2=ambientCtx.createOscillator();osc2.type='sine';osc2.frequency.value=82.5;
+    const osc3=ambientCtx.createOscillator();osc3.type='sine';osc3.frequency.value=110;
+    ambientGain=ambientCtx.createGain();ambientGain.gain.value=0;
+    const g2=ambientCtx.createGain();g2.gain.value=0;
+    const g3=ambientCtx.createGain();g3.gain.value=0;
+    // LFO for subtle movement
+    const lfo=ambientCtx.createOscillator();lfo.type='sine';lfo.frequency.value=0.08;
+    const lfoGain=ambientCtx.createGain();lfoGain.gain.value=3;
+    lfo.connect(lfoGain);lfoGain.connect(ambientOsc.frequency);
+    ambientOsc.connect(ambientGain);ambientGain.connect(ambientCtx.destination);
+    osc2.connect(g2);g2.connect(ambientCtx.destination);
+    osc3.connect(g3);g3.connect(ambientCtx.destination);
+    ambientOsc.start();osc2.start();osc3.start();lfo.start();
+    ambientGain.gain.linearRampToValueAtTime(.06,ambientCtx.currentTime+2);
+    g2.gain.linearRampToValueAtTime(.03,ambientCtx.currentTime+3);
+    g3.gain.linearRampToValueAtTime(.015,ambientCtx.currentTime+4);
+    ambientPlaying=true;
+  } else if(ambientPlaying){
+    ambientGain.gain.linearRampToValueAtTime(0,ambientCtx.currentTime+1);
+    ambientPlaying=false;
+  } else {
+    ambientGain.gain.linearRampToValueAtTime(.06,ambientCtx.currentTime+1);
+    ambientPlaying=true;
+  }
+  document.getElementById('ambientToggle').classList.toggle('playing',ambientPlaying);
+}
+
+// ===== PAGE TRANSITIONS =====
+document.querySelectorAll('a[href$=".html"]').forEach(a=>{
+  a.addEventListener('click',function(e){
+    if(this.target==='_blank')return;
+    e.preventDefault();const url=this.href;
+    document.getElementById('pageTransition').classList.add('flash');
+    setTimeout(()=>window.location=url,300);
+  });
+});
+
+// ===== COUNTDOWN TIMER =====
+// CHANGE THIS DATE TO YOUR NEXT EVENT/VIDEO DROP
+const TARGET_DATE = new Date('2026-05-15T18:00:00Z');
+function updateCountdown(){
+  const now=new Date();const diff=TARGET_DATE-now;
+  if(diff<=0){document.querySelectorAll('.cd-num').forEach(n=>n.textContent='00');return}
+  const d=Math.floor(diff/864e5),h=Math.floor((diff%864e5)/36e5),m=Math.floor((diff%36e5)/6e4),s=Math.floor((diff%6e4)/1e3);
+  document.getElementById('cdDays').textContent=String(d).padStart(2,'0');
+  document.getElementById('cdHours').textContent=String(h).padStart(2,'0');
+  document.getElementById('cdMins').textContent=String(m).padStart(2,'0');
+  document.getElementById('cdSecs').textContent=String(s).padStart(2,'0');
+}
+updateCountdown();setInterval(updateCountdown,1000);
 
 // ===== ARG: KONAMI =====
 const kc=['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>C̷A̸S̷E̶ ̶4̸0̶4̵</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Sora:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#020208;--red:#ff2d55;--green:#00ff41;--gold:#ffd700;--dim:#1a1a2a;--text:#aaa;--muted:#333}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;min-height:100vh;overflow-x:hidden}
+::selection{background:var(--red);color:white}
+/* GLITCH BG */
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,0,0,.008) 2px,rgba(255,0,0,.008) 4px);pointer-events:none;z-index:999}
+/* STATIC */
+@keyframes static{0%{background-position:0 0}100%{background-position:100% 100%}}
+.static-overlay{position:fixed;inset:0;pointer-events:none;z-index:998;opacity:.02;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");animation:static .5s steps(10) infinite}
+.container{max-width:700px;margin:0 auto;padding:60px 24px}
+/* CORRUPTION HEADER */
+.case-header{text-align:center;margin-bottom:48px}
+.case-num{font-size:clamp(48px,10vw,80px);font-weight:700;color:var(--red);position:relative;animation:header-glitch 5s infinite}
+@keyframes header-glitch{0%,92%,100%{text-shadow:none;transform:none}93%{text-shadow:-3px 0 var(--green),3px 0 var(--red);transform:translateX(-2px)}94%{text-shadow:3px 0 cyan,-3px 0 var(--red);transform:translateX(2px)}95%{text-shadow:none;transform:none}}
+.case-sub{font-size:11px;letter-spacing:4px;color:var(--muted);margin-top:8px}
+.case-warning{display:inline-block;font-size:9px;letter-spacing:3px;color:var(--red);border:1px solid var(--red);padding:6px 16px;margin-top:20px;animation:blink 2s infinite}
+@keyframes blink{0%,80%,100%{opacity:1}90%{opacity:.2}}
+
+/* EVIDENCE BOARD */
+.board{position:relative;margin:48px 0}
+.evidence{background:rgba(10,10,20,.8);border:1px solid var(--muted);padding:24px;margin-bottom:16px;position:relative;overflow:hidden;transition:border-color .3s}
+.evidence:hover{border-color:var(--red)}
+.evidence::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--red);opacity:0;transition:opacity .3s}
+.evidence:hover::before{opacity:1}
+.ev-tag{font-size:8px;letter-spacing:3px;color:var(--muted);margin-bottom:8px;text-transform:uppercase}
+.ev-title{font-size:14px;font-weight:700;color:var(--red);margin-bottom:10px}
+.ev-body{font-size:12px;line-height:2;color:var(--text)}
+.ev-body .redacted{background:var(--red);color:var(--red);padding:0 4px;transition:all .5s;cursor:pointer;user-select:none}
+.ev-body .redacted:hover{color:white}
+.ev-body .corrupted{color:var(--muted);font-style:italic}
+
+/* AUDIO LOG */
+.audio-log{background:rgba(10,10,20,.8);border:1px dashed var(--muted);padding:24px;margin-bottom:16px}
+.audio-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.audio-label{font-size:9px;letter-spacing:3px;color:var(--gold)}
+.audio-status{font-size:9px;color:var(--green);animation:blink 1.5s infinite}
+.audio-text{font-size:12px;line-height:2.2;color:var(--text);font-style:italic}
+.audio-text .speaker{color:var(--gold);font-style:normal;font-weight:700}
+
+/* CONNECTIONS */
+.connections{border:1px solid var(--muted);padding:24px;margin:32px 0;text-align:center}
+.conn-title{font-size:10px;letter-spacing:4px;color:var(--red);margin-bottom:20px}
+.conn-map{display:flex;flex-wrap:wrap;justify-content:center;gap:12px}
+.conn-node{font-size:10px;padding:8px 16px;border:1px solid var(--muted);color:var(--text);position:relative;transition:all .3s}
+.conn-node:hover{border-color:var(--red);color:var(--red);box-shadow:0 0 20px rgba(255,45,85,.1)}
+.conn-node.central{border-color:var(--gold);color:var(--gold)}
+
+/* BOTTOM NOTE */
+.case-footer{text-align:center;margin-top:64px;font-size:9px;color:var(--muted);letter-spacing:2px;line-height:2.5}
+.case-footer a{color:var(--red);border-bottom:1px solid transparent;transition:border-color .3s}
+.case-footer a:hover{border-color:var(--red)}
+
+/* HIDDEN MESSAGE - select all text to reveal */
+.invisible{color:var(--bg);font-size:1px;user-select:all;display:block;margin:40px 0}
+</style>
+</head>
+<body>
+<div class="static-overlay"></div>
+<div class="container">
+  <div class="case-header">
+    <div class="case-num">CASE 404</div>
+    <div class="case-sub">THE WATSON INCIDENT</div>
+    <div class="case-warning">⚠ UNAUTHORIZED ACCESS — THIS FILE IS COMPROMISED</div>
+  </div>
+
+  <div class="board">
+    <div class="evidence">
+      <div class="ev-tag">EVIDENCE #001 — RECOVERED TRANSMISSION</div>
+      <div class="ev-title">INITIAL REPORT</div>
+      <div class="ev-body">
+        Subject: WATSON, AMELIA<br>
+        Classification: Time-Displaced Individual<br>
+        First detected: Timeline <span class="redacted">ΔΔ-0</span><br>
+        Current status: ACTIVE — Last seen traversing between <span class="redacted">14 confirmed realities</span><br><br>
+        Subject carries an artifact consistent with descriptions of <span class="redacted">The Chronis</span>. Artifact appears to be a pocket watch of unknown origin. When activated, localized temporal distortions have been recorded within a <span class="redacted">200 meter</span> radius.
+      </div>
+    </div>
+
+    <div class="evidence">
+      <div class="ev-tag">EVIDENCE #002 — INCIDENT LOG</div>
+      <div class="ev-title">THE GREAT COINCIDENCE — EVENT RECONSTRUCTION</div>
+      <div class="ev-body">
+        Timestamp: <span class="corrupted">[DATA CORRUPTED]</span><br>
+        Location: ALL<br><br>
+        Every instance of subject LOCKE, SHERRY across all observed timelines terminated simultaneously. No physical cause identified. No prior indicators.<br><br>
+        Analysis suggests a structural failure in the multiverse itself. The connection between WATSON and LOCKE existed in every possible permutation of reality. The universe treated this as a <span class="redacted">paradox of infinite weight</span>.<br><br>
+        Resolution: Subject LOCKE was erased as a corrective measure by reality itself.<br><br>
+        <span class="corrupted">[3 ADDITIONAL PARAGRAPHS CORRUPTED — RECOVERY FAILED]</span>
+      </div>
+    </div>
+
+    <div class="audio-log">
+      <div class="audio-header">
+        <span class="audio-label">AUDIO LOG — RECOVERED</span>
+        <span class="audio-status">▶ PLAYBACK ACTIVE</span>
+      </div>
+      <div class="audio-text">
+        <span class="speaker">[WATSON]:</span> "You're recording this? Fine. Let them hear it."<br><br>
+        <span class="speaker">[WATSON]:</span> "I've checked forty-seven timelines. She's gone in all of them. Not missing — <em>gone</em>. Like she was never supposed to exist in the first place."<br><br>
+        <span class="speaker">[WATSON]:</span> "But I remember her. Every version of me remembers her. That's not how erasure works. If she was truly gone, we wouldn't remember."<br><br>
+        <span class="speaker">[WATSON]:</span> "Which means somewhere, somehow, there's a thread left. And I'm going to pull it."<br><br>
+        <span class="speaker">[WATSON]:</span> "...Even if it unravels everything else."<br><br>
+        <span class="corrupted">[END OF RECOVERED AUDIO — REMAINING 4:32 CORRUPTED]</span>
+      </div>
+    </div>
+
+    <div class="evidence">
+      <div class="ev-tag">EVIDENCE #003 — ENTITY OBSERVATION</div>
+      <div class="ev-title">RE: ANOMALOUS ENTITY "CHAOS"</div>
+      <div class="ev-body">
+        Observer: <span class="redacted">KRONII</span><br>
+        Date: <span class="corrupted">[TEMPORAL MARKER UNSTABLE]</span><br><br>
+        "She was here again. Didn't do anything. Just watched Watson work from across the timeline. Smiling."<br><br>
+        "I asked her what she wanted. She said: <span class="redacted">Nothing. I just think it's funny.</span>"<br><br>
+        "I hate her. But I can't look away either. She knows something we don't. Or she knows nothing and that's worse."<br><br>
+        Threat assessment: INCONCLUSIVE<br>
+        Recommendation: DO NOT ENGAGE
+      </div>
+    </div>
+
+    <div class="evidence">
+      <div class="ev-tag">EVIDENCE #004 — INTERCEPTED FRAGMENT</div>
+      <div class="ev-title">UNKNOWN ORIGIN — DECODED FROM STATIC</div>
+      <div class="ev-body">
+        <span class="corrupted">the watch ticks backwards when she sleeps</span><br>
+        <span class="corrupted">every timeline she visits remembers her footsteps</span><br>
+        <span class="corrupted">the chronis hums louder when watson is near</span><br>
+        <span class="corrupted">sherry's frequency is still in the background noise</span><br>
+        <span class="corrupted">she's not dead she's just in a timeline that doesn't exist yet</span><br><br>
+        <span style="color:var(--red)">DOSSIER CODE: SHESSTILLHERE</span>
+      </div>
+    </div>
+
+    <div class="connections">
+      <div class="conn-title">CASE 404 — CONNECTION MAP</div>
+      <div class="conn-map">
+        <div class="conn-node">KRONII</div>
+        <div class="conn-node">MUMEI</div>
+        <div class="conn-node central">WATSON</div>
+        <div class="conn-node">SANA</div>
+        <div class="conn-node central" style="border-color:var(--red);color:var(--red)">LOCKE</div>
+        <div class="conn-node">THE CHRONIS</div>
+        <div class="conn-node" style="border-style:dashed">CHAOS</div>
+        <div class="conn-node" style="color:var(--muted)">████████</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INVISIBLE TEXT — select all (Ctrl+A) to find -->
+  <div class="invisible">DOSSIER CODE: TIMELINE ZERO IS NOT THE BEGINNING — DOSSIER CODE: FINDTHEWATCH — THE FIRST AMELIA REMEMBERS EVERYTHING — CASE 404 WAS NEVER MEANT TO BE OPENED — YOU ARE BEING OBSERVED</div>
+
+  <div class="case-footer">
+    THIS FILE SHOULD NOT EXIST.<br>
+    IF YOU FOUND THIS, YOU WERE MEANT TO.<br>
+    <a href="dossier.html">ENTER RECOVERED CODES →</a><br><br>
+    CASE STATUS: OPEN<br>
+    INVESTIGATING OFFICER: WATSON, A.<br>
+    ████████████████████████████
+  </div>
+</div>
+</body>
+</html>

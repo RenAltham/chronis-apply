@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CHRONIS://ACCESS</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0a0a;color:#00ff41;font-family:'JetBrains Mono',monospace;min-height:100vh;display:flex;flex-direction:column}
+::selection{background:#00ff41;color:#0a0a0a}
+.scanline{position:fixed;inset:0;pointer-events:none;z-index:999;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,255,65,.015) 2px,rgba(0,255,65,.015) 4px)}
+.crt{position:fixed;inset:0;pointer-events:none;z-index:998;box-shadow:inset 0 0 100px rgba(0,0,0,.5);border-radius:8px}
+#terminal{flex:1;padding:24px;overflow-y:auto;padding-bottom:80px}
+.line{font-size:13px;line-height:1.8;white-space:pre-wrap;word-break:break-word}
+.line.sys{color:#555}.line.err{color:#ff2d55}.line.gold{color:#ffd700}.line.cyan{color:#00e5ff}.line.green{color:#00ff88}.line.dim{color:#333}
+.input-area{position:fixed;bottom:0;left:0;right:0;padding:16px 24px;background:rgba(10,10,10,.95);border-top:1px solid #1a1a1a;display:flex;align-items:center;gap:8px}
+.prompt{color:#00ff41;font-size:13px;flex-shrink:0}
+#cmdInput{flex:1;background:none;border:none;color:#00ff41;font-family:'JetBrains Mono',monospace;font-size:13px;outline:none;caret-color:#00ff41}
+.blink{animation:blink-cursor 1s step-end infinite}
+@keyframes blink-cursor{50%{opacity:0}}
+</style>
+</head>
+<body>
+<div class="scanline"></div>
+<div class="crt"></div>
+<div id="terminal"></div>
+<div class="input-area">
+  <span class="prompt">CHRONIS://&gt;</span>
+  <input type="text" id="cmdInput" autofocus autocomplete="off" spellcheck="false">
+</div>
+
+<script>
+const term = document.getElementById('terminal');
+const input = document.getElementById('cmdInput');
+
+function print(text, cls='') {
+  const d = document.createElement('div');
+  d.className = 'line ' + cls;
+  d.textContent = text;
+  term.appendChild(d);
+  term.scrollTop = term.scrollHeight;
+}
+
+function printHTML(html, cls='') {
+  const d = document.createElement('div');
+  d.className = 'line ' + cls;
+  d.innerHTML = html;
+  term.appendChild(d);
+  term.scrollTop = term.scrollHeight;
+}
+
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+async function boot() {
+  print('CHRONIS TERMINAL v0.7.2', 'sys');
+  await delay(300);
+  print('Connecting to Timeline Zero...', 'sys');
+  await delay(500);
+  print('Connection established.', 'green');
+  await delay(200);
+  print('');
+  print('Welcome, operative. Type HELP for available commands.', 'gold');
+  print('');
+}
+
+const FILES = {
+  'watson.log': `SUBJECT: Amelia Watson\nSTATUS: Active — Searching\nROLE: Time-Displaced Detective\nLAST KNOWN LOCATION: Timeline ΔΔ-0\n\nShe carries the watch. She remembers everything.\nEvery loop. Every failure. Every version of Sherry\nthat she couldn't save.\n\nShe will not stop.`,
+  'sherry.log': `SUBJECT: Sherry Locke\nSTATUS: DECEASED — ALL TIMELINES\nCAUSE: The Great Coincidence\n\n"She died everywhere. At the same time.\nIn every when. Not because the universe\nwanted her gone — but because it couldn't\nhold the weight of how much she mattered\nto every version of me."\n— A.W.`,
+  'chaos.log': `ENTITY: Chaos\nSTATUS: Idle\nTHREAT LEVEL: Undefined\n\nShe doesn't play by rules because rules\ndon't apply to her. She exists outside\nthe framework. She watches. She smiles.\nShe pokes holes in reality for fun.\n\n"Nothing. I just think it's funny." — CHAOS`,
+  'chronis.dat': `ARTIFACT: The Chronis\nORIGIN: Convergence of Avatar Cores\n\nTime + Space + Civilization + Nature + ...\n= Absolute dominion over all existence\n\nEXCEPT: Chaos\n\nThe Chronis does not intervene.\nIt observes. It waits.\nUnless the balance demands otherwise.`,
+  'readme.txt': `IF YOU FOUND THIS TERMINAL, GOOD.\n\nThis system contains fragments of classified\ninformation from across the Chronis multiverse.\n\nSome files are visible. Some are hidden.\nSome require passwords you haven't found yet.\n\nKeep looking. The codes are everywhere.\n\n— T.I. SYSTEMS ADMINISTRATOR`,
+  'note_from_k.txt': `Personal note from Kronii:\n\nI left this here because Watson won't.\nShe's too focused on Sherry to tell\nanyone what's really happening.\n\nThe Chronis is changing. It's been\nhumming differently since the Coincidence.\nLike it's... waiting for something.\n\nOr someone.\n\nDon't tell Watson I wrote this.\n— K.`,
+  'manifest.log': `CHRONIS GAME SERIES — PROJECT MANIFEST\n\nCHRONIS: OMEGA ......... [IN DEVELOPMENT]\nFRACTURE CREW .......... [IN DEVELOPMENT]\nNEUROTICISM ............ [CONCEPT]\nCHRONIS: ████████ ...... [CLASSIFIED]\n\nENGINE: Unreal Engine 5\nSTUDIO: Timeborne Interactive\nLEAD: Ren (@RenHatesCode)`,
+  'coordinates.dat': `RECOVERED COORDINATES:\n\nTimeline ΔΔ-0: 47.3769, 8.5417\nTimeline ΣΣ-7: ████████████\nTimeline ΩΩ-1: DOES NOT EXIST YET\n\nNote: The third coordinate is where\nWatson believes she can rebuild.\nA timeline that doesn't exist.\n\nDOSSIER CODE: REBUILDTHETIMELINE`,
+};
+
+const PASSWORDS = {
+  'omega': { msg: 'ACCESS GRANTED — OMEGA CLEARANCE\n\nThe Chronis was not created. It was inevitable.\nEvery timeline was always going to converge.\nThe Avatars merely accelerated what was already happening.\n\nDOSSIER CODE: INEVITABLECONVERGENCE' },
+  'watson': { msg: 'ACCESS GRANTED — WATSON CLEARANCE\n\nAmelia has visited 2,847 timelines.\nSherry is dead in all of them.\nBut in Timeline ΩΩ-1... the readings are different.\nThe timeline doesn\'t exist yet.\nBut it will.' },
+  'sherry': { msg: 'ACCESS GRANTED —\n\n...\n\nShe can hear you.\n\nDOSSIER CODE: SHECANHEARYOU' },
+  'chronis': { msg: 'THE CHRONIS OBSERVES.\nTHE CHRONIS WAITS.\nTHE CHRONIS REMEMBERS.\n\nYOU ARE REMEMBERED.' },
+  'chaos': { msg: 'lol nice try\n\n— Chaos\n\nDOSSIER CODE: SHESAMUSED' },
+};
+
+const COMMANDS = {
+  'help': () => {
+    print('');
+    print('AVAILABLE COMMANDS:', 'gold');
+    print('  help         — Show this menu');
+    print('  ls           — List available files');
+    print('  cat <file>   — Read a file');
+    print('  status       — System status');
+    print('  whoami       — Identity check');
+    print('  ping         — Connection test');
+    print('  password <x> — Enter a password');
+    print('  clear        — Clear terminal');
+    print('  dossier      — Check dossier status');
+    print('  exit         — Disconnect');
+    print('');
+    print('Some commands are hidden. Explore.', 'dim');
+  },
+  'ls': () => {
+    print('');
+    print('DIRECTORY: /chronis/classified/', 'sys');
+    Object.keys(FILES).forEach(f => print('  ' + f));
+    print('  [2 HIDDEN FILES — ACCESS RESTRICTED]', 'err');
+    print('');
+  },
+  'status': () => {
+    print('');
+    print('SYSTEM STATUS:', 'gold');
+    print('  Connection:  TIMELINE ZERO — STABLE');
+    print('  Clearance:   LEVEL 1 (BASIC)');
+    print('  Uptime:      ∞');
+    print('  Anomalies:   3 DETECTED', 'err');
+    print('  Chronis:     OBSERVING');
+    print('  Watson:      ACTIVE — SEARCHING');
+    print('  Chaos:       ¯\\_(ツ)_/¯', 'err');
+    print('');
+  },
+  'whoami': () => { print(''); print('UNKNOWN OPERATIVE — CLEARANCE PENDING', 'gold'); print('You found this terminal. That means something.', 'dim'); print(''); },
+  'ping': () => {
+    print('');
+    print('Pinging Timeline Zero... 1ms', 'green');
+    print('Pinging Timeline ΔΔ-0... 47ms', 'green');
+    print('Pinging Timeline ΣΣ-7... TIMEOUT', 'err');
+    print('Pinging Timeline ΩΩ-1... DOES NOT EXIST', 'err');
+    print('Pinging Chaos... REFUSED (she says hi)', 'err');
+    print('');
+  },
+  'clear': () => { term.innerHTML = ''; },
+  'dossier': () => {
+    print('');
+    print('DOSSIER SYSTEM: ACTIVE', 'gold');
+    print('Codes found in this terminal can be entered at:');
+    printHTML('  <a href="dossier.html" style="color:#00e5ff">chronis/dossier.html</a>', 'cyan');
+    print('');
+    print('Keep exploring. Codes are hidden everywhere.', 'dim');
+    print('');
+  },
+  'exit': () => {
+    print('');
+    print('Disconnecting from Timeline Zero...', 'sys');
+    print('You can close this tab. Or stay.', 'dim');
+    print('The terminal will remember you were here.', 'dim');
+    print('');
+  },
+  'date': () => { print(''); print('TEMPORAL MARKER: UNSTABLE', 'err'); print('Current time is relative to your timeline.', 'dim'); print('From our perspective, it is always now.', 'dim'); print(''); },
+  'sudo': () => { print(''); print('Nice try.', 'err'); print(''); },
+  'hack': () => { print(''); print('This isn\'t a movie.', 'err'); print(''); },
+  'hello': () => { print(''); print('Hello, operative. You\'re braver than most.', 'gold'); print(''); },
+  'amelia': () => { print(''); print('She\'s still looking. She\'ll never stop.', 'gold'); print(''); },
+  'konami': () => { print(''); print('↑ ↑ ↓ ↓ ← → ← → B A', 'gold'); print('You already know this one.', 'dim'); print(''); },
+};
+
+function processCmd(cmd) {
+  const raw = cmd.trim();
+  const lower = raw.toLowerCase();
+  const parts = lower.split(' ');
+  const base = parts[0];
+  const arg = parts.slice(1).join(' ');
+
+  print('CHRONIS://> ' + raw, 'sys');
+
+  if (!raw) return;
+
+  if (base === 'cat' && arg) {
+    if (FILES[arg]) { print(''); print(FILES[arg]); print(''); }
+    else { print(''); print('File not found: ' + arg, 'err'); print(''); }
+    return;
+  }
+
+  if (base === 'password' && arg) {
+    if (PASSWORDS[arg]) { print(''); print(PASSWORDS[arg].msg, 'gold'); print(''); }
+    else { print(''); print('ACCESS DENIED — INVALID PASSWORD', 'err'); print(''); }
+    return;
+  }
+
+  if (COMMANDS[base]) { COMMANDS[base](); return; }
+
+  print('');
+  print('Unknown command: ' + base, 'err');
+  print('Type HELP for available commands.', 'dim');
+  print('');
+}
+
+input.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    processCmd(input.value);
+    input.value = '';
+  }
+});
+
+document.addEventListener('click', () => input.focus());
+boot();
+</script>
+</body>
+</html>

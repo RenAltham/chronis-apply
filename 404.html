@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TIMELINE NOT FOUND</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@300;400;700&family=Sora:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#03030a;color:#e4e4f0;font-family:'Sora',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,45,85,.01) 2px,rgba(255,45,85,.01) 4px);pointer-events:none}
+.container{text-align:center;position:relative;z-index:1;padding:40px}
+.error-code{font-family:'Orbitron',sans-serif;font-size:clamp(100px,20vw,200px);font-weight:900;color:#ff2d55;line-height:1;position:relative;animation:glitch-404 4s infinite}
+@keyframes glitch-404{0%,90%,100%{text-shadow:none}92%{text-shadow:-4px 0 #00e5ff,4px 0 #ff2d55}94%{text-shadow:4px 0 #ffd700,-4px 0 #00e5ff}96%{text-shadow:-2px 0 #ff2d55,2px 0 #ffd700}}
+.error-title{font-family:'Orbitron',sans-serif;font-size:clamp(16px,3vw,24px);font-weight:700;letter-spacing:6px;color:#ffd700;margin:24px 0 16px}
+.error-sub{font-size:14px;font-weight:300;color:#5a5a80;max-width:400px;margin:0 auto 40px;line-height:1.8}
+.error-sub em{color:#00e5ff}
+.back-link{display:inline-block;font-family:'Orbitron',sans-serif;font-size:11px;font-weight:600;letter-spacing:4px;padding:14px 36px;border:1px solid #ffd700;color:#ffd700;transition:all .3s}
+.back-link:hover{background:#ffd700;color:#03030a}
+a{color:inherit;text-decoration:none}
+.hidden-code{font-family:'JetBrains Mono',monospace;font-size:8px;color:#1a1a2a;margin-top:60px;cursor:default;transition:color .5s;user-select:all}
+.hidden-code:hover{color:#333}
+/* Floating 404s */
+.float-num{position:fixed;font-family:'Orbitron',sans-serif;font-weight:900;color:rgba(255,45,85,.03);pointer-events:none;animation:drift linear infinite}
+@keyframes drift{0%{transform:translateY(110vh) rotate(0deg)}100%{transform:translateY(-10vh) rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="error-code">404</div>
+  <div class="error-title">TIMELINE NOT FOUND</div>
+  <div class="error-sub">The timeline you're looking for doesn't exist. <em>Yet.</em> It may have been erased, corrupted, or hasn't been written into reality.</div>
+  <a href="index.html" class="back-link">RETURN TO TIMELINE ZERO</a>
+  <div class="hidden-code">DOSSIER CODE: LOSTTIMELINE</div>
+</div>
+<script>
+for(let i=0;i<12;i++){const d=document.createElement('div');d.className='float-num';d.textContent='404';d.style.left=Math.random()*100+'%';d.style.fontSize=(40+Math.random()*120)+'px';d.style.animationDuration=(15+Math.random()*25)+'s';d.style.animationDelay=Math.random()*-20+'s';document.body.appendChild(d)}
+</script>
+</body>
+</html>

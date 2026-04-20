@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CHRONIS — System Access</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}body{background:#0a0a0a;color:#e4e4f0;font-family:'JetBrains Mono',monospace;min-height:100vh;display:flex;align-items:center;justify-content:center}
+.login-box{width:100%;max-width:400px;padding:40px;border:1px solid #1a1a2a;position:relative}
+.login-box::before{content:'CHRONIS://ADMIN';position:absolute;top:-10px;left:16px;background:#0a0a0a;padding:0 8px;font-size:9px;color:#d4a539;letter-spacing:3px}
+.login-title{font-family:'Orbitron',sans-serif;font-size:18px;font-weight:700;letter-spacing:4px;color:#ffd700;text-align:center;margin-bottom:8px}
+.login-sub{font-size:10px;color:#333;text-align:center;margin-bottom:32px;letter-spacing:2px}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:9px;letter-spacing:3px;color:#5a5a80;margin-bottom:6px;text-transform:uppercase}
+.field input{width:100%;background:#050510;border:1px solid #1a1a2a;color:#e4e4f0;font-family:'JetBrains Mono',monospace;font-size:13px;padding:12px 16px;outline:none;transition:border-color .3s}
+.field input:focus{border-color:#d4a539}
+.login-btn{width:100%;font-family:'Orbitron',sans-serif;font-size:11px;font-weight:600;letter-spacing:4px;padding:14px;background:none;border:1px solid #d4a539;color:#d4a539;cursor:pointer;transition:all .3s;margin-top:8px}
+.login-btn:hover{background:#d4a539;color:#0a0a0a}
+.login-msg{font-size:11px;text-align:center;margin-top:16px;min-height:20px}
+.login-msg.fail{color:#ff2d55}.login-msg.ok{color:#00ff88}
+/* Control Room */
+.control-room{display:none;width:100%;max-width:700px;padding:40px}
+.control-room.show{display:block}
+.cr-header{font-family:'Orbitron',sans-serif;font-size:20px;font-weight:800;letter-spacing:4px;color:#00ff88;margin-bottom:24px;text-align:center}
+.cr-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:500px){.cr-grid{grid-template-columns:1fr}}
+.cr-panel{background:#0f0f1a;border:1px solid #1a1a2a;padding:20px}
+.cr-label{font-size:8px;letter-spacing:3px;color:#5a5a80;margin-bottom:8px;text-transform:uppercase}
+.cr-val{font-family:'Orbitron',sans-serif;font-size:22px;font-weight:800}
+.cr-val.green{color:#00ff88}.cr-val.gold{color:#ffd700}.cr-val.red{color:#ff2d55}.cr-val.cyan{color:#00e5ff}
+.cr-bar{height:4px;background:#1a1a2a;margin-top:8px;border-radius:2px;overflow:hidden}
+.cr-fill{height:100%;border-radius:2px;transition:width 2s}
+.cr-log{grid-column:1/-1;background:#050510;border:1px solid #1a1a2a;padding:20px;font-size:11px;line-height:2;color:#555;max-height:200px;overflow-y:auto}
+.cr-log .highlight{color:#ffd700}
+.cr-secret{grid-column:1/-1;text-align:center;font-size:10px;color:#2a2a4a;margin-top:12px;transition:color .5s;cursor:help}
+.cr-secret:hover{color:#5a5a80}
+</style>
+</head>
+<body>
+<div class="login-box" id="loginBox">
+  <div class="login-title">SYSTEM ACCESS</div>
+  <div class="login-sub">AUTHORIZED PERSONNEL ONLY</div>
+  <div class="field"><label>Username</label><input type="text" id="username" autocomplete="off"></div>
+  <div class="field"><label>Password</label><input type="password" id="password" autocomplete="off"></div>
+  <button class="login-btn" onclick="tryLogin()">AUTHENTICATE</button>
+  <div class="login-msg" id="loginMsg"></div>
+</div>
+<div class="control-room" id="controlRoom">
+  <div class="cr-header">CHRONIS CONTROL ROOM</div>
+  <div class="cr-grid">
+    <div class="cr-panel"><div class="cr-label">Timeline Integrity</div><div class="cr-val green" id="crIntegrity">94.7%</div><div class="cr-bar"><div class="cr-fill" style="width:94.7%;background:#00ff88"></div></div></div>
+    <div class="cr-panel"><div class="cr-label">Active Timelines</div><div class="cr-val cyan">2,847</div></div>
+    <div class="cr-panel"><div class="cr-label">Chronis Status</div><div class="cr-val gold">OBSERVING</div></div>
+    <div class="cr-panel"><div class="cr-label">Watson Status</div><div class="cr-val cyan">SEARCHING</div></div>
+    <div class="cr-panel"><div class="cr-label">Chaos Status</div><div class="cr-val red">AMUSED</div></div>
+    <div class="cr-panel"><div class="cr-label">Sherry Signal</div><div class="cr-val gold" style="animation:blink 2s infinite">DETECTED</div></div>
+    <div class="cr-log" id="crLog">
+      <div>> SYSTEM BOOT COMPLETE</div>
+      <div>> ALL MONITORING SYSTEMS NOMINAL</div>
+      <div>> WARNING: Anomaly detected in sector ΩΩ-1</div>
+      <div class="highlight">> ALERT: Sherry Locke residual frequency spiking</div>
+      <div>> Watson last seen: Timeline 2,291</div>
+      <div>> Chaos last activity: Poked a hole in Timeline 847</div>
+      <div class="highlight">> NOTE: Timeline ΩΩ-1 formation at 12.3%</div>
+      <div>> Kronii reports: "I need a nap"</div>
+    </div>
+    <div class="cr-secret">DOSSIER CODE: CONTROLROOM</div>
+  </div>
+</div>
+<script>
+function tryLogin(){
+  const u=document.getElementById('username').value.toLowerCase().trim();
+  const p=document.getElementById('password').value.toLowerCase().trim();
+  const m=document.getElementById('loginMsg');
+  if((u==='watson'&&p==='sherry')||(u==='admin'&&p==='chronis')||(u==='ren'&&p==='timeborne')){
+    m.textContent='> ACCESS GRANTED';m.className='login-msg ok';
+    setTimeout(()=>{document.getElementById('loginBox').style.display='none';document.getElementById('controlRoom').classList.add('show')},1000);
+  } else {
+    m.textContent='> ACCESS DENIED';m.className='login-msg fail';
+  }
+}
+document.getElementById('password').addEventListener('keydown',e=>{if(e.key==='Enter')tryLogin()});
+// Simulate live updates
+setInterval(()=>{const v=(93+Math.random()*4).toFixed(1);document.getElementById('crIntegrity').textContent=v+'%'},5000);
+</script>
+<style>@keyframes blink{0%,80%,100%{opacity:1}90%{opacity:.3}}</style>
+</body>
+</html>
