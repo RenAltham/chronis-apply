@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CHRONIS — Dossier System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;700&family=Sora:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#03030a;--surface:rgba(12,12,30,0.7);--surface-solid:#0c0c1e;
+  --border:rgba(255,215,0,0.08);--border-hover:rgba(255,215,0,0.25);
+  --gold:#d4a539;--gold-bright:#ffd700;--gold-dim:rgba(255,215,0,0.06);--gold-glow:rgba(255,215,0,0.15);
+  --cyan:#00e5ff;--cyan-dim:rgba(0,229,255,0.08);
+  --red:#ff2d55;--green:#00ff88;
+  --text:#e4e4f0;--text-dim:#5a5a80;--text-muted:#2a2a4a;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Sora',sans-serif;min-height:100vh}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--gold);border-radius:2px}
+a{color:inherit;text-decoration:none}
+
+.back-btn{position:fixed;top:16px;left:16px;z-index:100;display:flex;align-items:center;gap:8px;font-family:'Orbitron',sans-serif;font-size:12px;font-weight:600;letter-spacing:4px;color:var(--gold);padding:10px 20px;background:rgba(3,3,10,.9);backdrop-filter:blur(12px);border:1px solid var(--border);transition:all .3s}
+.back-btn:hover{border-color:var(--gold)}
+.back-btn .arrow{transition:transform .3s}
+.back-btn:hover .arrow{transform:translateX(-4px)}
+
+.grain{position:fixed;inset:0;pointer-events:none;z-index:997;opacity:.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+.container{max-width:900px;margin:0 auto;padding:100px 24px 60px}
+
+/* HEADER */
+.dos-header{text-align:center;margin-bottom:60px}
+.dos-badge{display:inline-flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:5px;color:var(--cyan);border:1px solid var(--cyan-dim);padding:6px 20px;margin-bottom:24px;text-transform:uppercase;background:var(--cyan-dim)}
+.dos-title{font-family:'Orbitron',sans-serif;font-size:clamp(32px,6vw,48px);font-weight:900;letter-spacing:4px;background:linear-gradient(135deg,var(--text),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:12px}
+.dos-sub{font-size:14px;color:var(--text-dim);font-weight:300}
+
+/* PROGRESS BAR */
+.progress-wrap{max-width:400px;margin:32px auto 0;text-align:center}
+.progress-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--text-dim);margin-bottom:8px}
+.progress-label span{color:var(--gold)}
+.progress-bar{height:3px;background:var(--text-muted);border-radius:2px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--cyan));transition:width .6s cubic-bezier(.16,1,.3,1);border-radius:2px}
+
+/* CODE INPUT */
+.code-section{text-align:center;margin:40px 0}
+.code-wrap{display:inline-flex;align-items:center;gap:0;border:1px solid var(--border);background:var(--surface);backdrop-filter:blur(8px);overflow:hidden;transition:border-color .3s}
+.code-wrap:focus-within{border-color:var(--gold)}
+.code-input{background:none;border:none;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:2px;padding:14px 20px;outline:none;width:280px;text-transform:uppercase}
+.code-input::placeholder{color:var(--text-muted);text-transform:none}
+.code-btn{font-family:'Orbitron',sans-serif;font-size:10px;font-weight:600;letter-spacing:3px;padding:14px 24px;background:var(--gold);color:var(--bg);border:none;cursor:pointer;transition:all .3s}
+.code-btn:hover{background:var(--gold-bright)}
+.code-msg{font-family:'JetBrains Mono',monospace;font-size:11px;margin-top:12px;min-height:20px;transition:color .3s}
+.code-msg.success{color:var(--green)}.code-msg.fail{color:var(--red)}.code-msg.dupe{color:var(--text-dim)}
+
+/* FILTER TABS */
+.filter-tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:32px;justify-content:center}
+.filter-tab{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;padding:8px 16px;border:1px solid var(--border);background:none;color:var(--text-dim);cursor:pointer;transition:all .3s;text-transform:uppercase}
+.filter-tab:hover{border-color:var(--text-dim);color:var(--text)}
+.filter-tab.active{border-color:var(--gold);color:var(--gold);background:var(--gold-dim)}
+
+/* DOSSIER GRID */
+.dos-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:700px){.dos-grid{grid-template-columns:1fr}}
+
+.dos-card{background:var(--surface);border:1px solid var(--border);padding:28px;position:relative;overflow:hidden;transition:all .4s;backdrop-filter:blur(8px);cursor:default}
+.dos-card.unlocked{cursor:pointer}
+.dos-card.unlocked:hover{border-color:var(--border-hover);transform:translateY(-4px)}
+.dos-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),transparent);opacity:0;transition:opacity .4s}
+.dos-card.unlocked:hover::before{opacity:1}
+
+.dos-card-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;gap:8px}
+.dos-card-title{font-family:'Orbitron',sans-serif;font-size:13px;font-weight:700;letter-spacing:2px}
+.dos-card.locked .dos-card-title{color:var(--text-muted)}
+.dos-card.unlocked .dos-card-title{color:var(--text)}
+
+.dos-class{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:2px;padding:3px 10px;border:1px solid;white-space:nowrap;flex-shrink:0}
+.class-CONFIDENTIAL{color:#5599ff;border-color:#5599ff!important}
+.class-SECRET{color:var(--gold);border-color:var(--gold)!important}
+.class-TOP-SECRET{color:#ff6633;border-color:#ff6633!important}
+.class-OMEGA{color:var(--red);border-color:var(--red)!important;animation:blink-tag 3s infinite}
+@keyframes blink-tag{0%,92%,100%{opacity:1}96%{opacity:.2}}
+
+.dos-cat{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--text-muted);margin-bottom:12px;text-transform:uppercase}
+
+.dos-card.locked .dos-preview{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted);line-height:1.8}
+.dos-card.unlocked .dos-preview{font-size:13px;color:var(--text-dim);font-weight:300;line-height:1.8}
+
+.dos-lock-icon{font-size:20px;opacity:.3;margin-top:8px}
+
+/* EXPANDED VIEW */
+.dos-modal{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.92);align-items:center;justify-content:center;padding:40px}
+.dos-modal.active{display:flex}
+.dos-modal-inner{max-width:600px;width:100%;max-height:80vh;overflow-y:auto;background:#080818;border:1px solid var(--border-hover);padding:40px;position:relative}
+.dos-modal-inner::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),var(--cyan))}
+.modal-close{position:absolute;top:16px;right:16px;background:none;border:none;color:var(--text-dim);font-size:20px;cursor:pointer;transition:color .3s}
+.modal-close:hover{color:var(--text)}
+.modal-class{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:3px;margin-bottom:8px}
+.modal-title{font-family:'Orbitron',sans-serif;font-size:22px;font-weight:800;letter-spacing:3px;color:var(--gold);margin-bottom:8px}
+.modal-cat{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--text-muted);margin-bottom:24px;text-transform:uppercase}
+.modal-body{font-size:14px;font-weight:300;line-height:2;color:var(--text);white-space:pre-line}
+.modal-body strong{color:var(--gold);font-weight:500}
+.modal-body em{color:var(--cyan)}
+.modal-hint{margin-top:24px;padding-top:16px;border-top:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted);font-style:italic}
+</style>
+</head>
+<body>
+<a href="index.html" class="back-btn"><span class="arrow">←</span> CHRONIS</a>
+<div class="grain"></div>
+
+<div class="container">
+  <div class="dos-header">
+    <div class="dos-badge">CLASSIFIED DATABASE</div>
+    <h1 class="dos-title">DOSSIER SYSTEM</h1>
+    <p class="dos-sub">Recover lost fragments. Enter access codes found across the Chronis universe.</p>
+    <div class="progress-wrap">
+      <div class="progress-label"><span id="unlockCount">0</span> / <span id="totalCount">0</span> ENTRIES RECOVERED</div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <div class="code-section">
+    <div class="code-wrap">
+      <input type="text" class="code-input" id="codeInput" placeholder="Enter access code..." maxlength="30">
+      <button class="code-btn" id="codeBtn" onclick="tryCode()">DECRYPT</button>
+    </div>
+    <div class="code-msg" id="codeMsg"></div>
+  </div>
+
+  <div class="filter-tabs" id="filterTabs"></div>
+  <div class="dos-grid" id="dosGrid"></div>
+</div>
+
+<!-- EXPANDED VIEW MODAL -->
+<div class="dos-modal" id="dosModal">
+  <div class="dos-modal-inner">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-class" id="modalClass"></div>
+    <h2 class="modal-title" id="modalTitle"></h2>
+    <div class="modal-cat" id="modalCat"></div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+/*
+  ╔══════════════════════════════════════════════════════════╗
+  ║              CHRONIS DOSSIER — HOW TO ADD               ║
+  ╠══════════════════════════════════════════════════════════╣
+  ║                                                          ║
+  ║  To add a new dossier entry, add an object to the        ║
+  ║  DOSSIER array below. Each entry needs:                  ║
+  ║                                                          ║
+  ║  id:      Unique string (no spaces, lowercase)           ║
+  ║  title:   Display name shown on the card                 ║
+  ║  class:   "CONFIDENTIAL" | "SECRET" | "TOP SECRET"       ║
+  ║           | "OMEGA"                                      ║
+  ║  cat:     Category — "PERSONNEL" | "EVENTS" |            ║
+  ║           "ENTITIES" | "LOCATIONS" | "ARTIFACTS" |       ║
+  ║           "TRANSMISSIONS"                                ║
+  ║  preview: Short teaser shown on locked card              ║
+  ║  content: Full lore text shown when unlocked             ║
+  ║           (supports line breaks, <strong>, <em>)         ║
+  ║  code:    The secret code to unlock (case insensitive)   ║
+  ║                                                          ║
+  ║  Then hide the code somewhere — in a YouTube video       ║
+  ║  description, a Discord message, the website source,     ║
+  ║  or spoken in a stream.                                  ║
+  ║                                                          ║
+  ║  Example:                                                ║
+  ║  { id:"example", title:"EXAMPLE ENTRY",                  ║
+  ║    class:"SECRET", cat:"EVENTS",                         ║
+  ║    preview:"[ENCRYPTED — CODE REQUIRED]",                ║
+  ║    content:"The full lore text goes here...",             ║
+  ║    code:"MYCODE123" }                                    ║
+  ║                                                          ║
+  ╚══════════════════════════════════════════════════════════╝
+*/
+
+const DOSSIER = [
+  {
+    id: "sherry-locke",
+    title: "SHERRY LOCKE",
+    class: "TOP SECRET",
+    cat: "PERSONNEL",
+    preview: "[SUBJECT FILE ENCRYPTED — CODE REQUIRED]",
+    content: `<strong>SUBJECT:</strong> Sherry Locke
+<strong>STATUS:</strong> Deceased — All Timelines
+<strong>CAUSE:</strong> The Great Coincidence
+
+Sherry Locke was Amelia Watson's closest companion across every known reality. Her death was not an isolated event — it was absolute. Every version of Sherry, across every possible timeline, ceased to exist simultaneously.
+
+The bond between every Amelia and every Sherry created an impossibility the universe could not sustain. When infinity collapsed under the weight of their connection, Sherry was the cost.
+
+<em>"She didn't just die. She was erased from possibility itself."</em>
+— Recovered Fragment, Timeline ΔΔ-0`,
+    code: "CASEFILEINFINITY"
+  },
+  {
+    id: "amelia-watson",
+    title: "AMELIA WATSON",
+    class: "SECRET",
+    cat: "PERSONNEL",
+    preview: "[DETECTIVE FILE ENCRYPTED — CODE REQUIRED]",
+    content: `<strong>SUBJECT:</strong> Amelia Watson
+<strong>ROLE:</strong> Time-Displaced Detective
+<strong>STATUS:</strong> Active — Searching
+
+A detective displaced across time, Amelia Watson is the protagonist of the Chronis series. Armed with her pocket watch and an unbreakable resolve, she traverses realities in search of the one thing The Chronis cannot give her — a timeline where Sherry Locke survived.
+
+Sarcastic. Resourceful. Haunted.
+
+She has seen the end of the universe more times than she can count. Each time, she winds the watch and starts again.
+
+<em>"I will find a timeline where she lives. Even if I have to build one myself."</em>`,
+    code: "GROUNDPOUND"
+  },
+  {
+    id: "the-chronis",
+    title: "THE CHRONIS",
+    class: "OMEGA",
+    cat: "ARTIFACTS",
+    preview: "[OMEGA CLEARANCE REQUIRED — ACCESS DENIED]",
+    content: `<strong>ARTIFACT:</strong> The Chronis
+<strong>ORIGIN:</strong> Convergence of all Avatar Cores
+<strong>STATUS:</strong> Active — Observing
+
+When the Avatars merged their Cores — fragments of Time, Space, Civilization, and every other pillar of existence — into a single object, The Chronis was born.
+
+It is the center of all realities. Every multiverse, every timeline, every dimension orbits around it. It has absolute dominion over all aspects of existence.
+
+All except one.
+
+<strong>LIMITATION:</strong> Chaos remains beyond its reach. The Chronis governs order. Chaos exists outside that framework entirely.
+
+<em>It watches. It waits. It does not intervene — unless the balance demands it.</em>`,
+    code: "TIMEBORNEOMEGA"
+  },
+  {
+    id: "great-coincidence",
+    title: "THE GREAT COINCIDENCE",
+    class: "OMEGA",
+    cat: "EVENTS",
+    preview: "[CATASTROPHIC EVENT LOG — OMEGA CLEARANCE REQUIRED]",
+    content: `<strong>EVENT:</strong> The Great Coincidence
+<strong>CLASSIFICATION:</strong> Ω — Multiversal Extinction Event
+<strong>CASUALTIES:</strong> Subject "Sherry Locke" — All Instances
+
+Across infinite realities, every version of Amelia Watson formed an unbreakable bond with every version of Sherry Locke. This was not coincidence — it was inevitability written into the fabric of existence.
+
+But infinity has limits.
+
+The universe could not sustain infinite identical connections. The weight of every Amelia loving every Sherry simultaneously overloaded the structure of the multiverse. Reality buckled. Infinity collapsed.
+
+The result: total, irreversible termination of all instances of Sherry Locke across all known and unknown timelines.
+
+<em>Not because the universe wanted her gone — but because it couldn't hold the weight of how much she mattered.</em>`,
+    code: "INFINITYCOLLAPSED"
+  },
+  {
+    id: "chaos",
+    title: "ENTITY: CHAOS",
+    class: "TOP SECRET",
+    cat: "ENTITIES",
+    preview: "[ANOMALOUS ENTITY — THREAT ASSESSMENT PENDING]",
+    content: `<strong>ENTITY:</strong> Chaos
+<strong>STATUS:</strong> Idle
+<strong>THREAT LEVEL:</strong> Undefined
+<strong>ALLEGIANCE:</strong> None
+
+Chaos is not a villain. Chaos is not an ally. Chaos simply <em>is</em>.
+
+It exists outside the framework of order, reality, and reason that The Chronis governs. It cannot be controlled, predicted, or contained. It does not oppose — it observes, occasionally interferes, and finds the whole situation rather amusing.
+
+Kronii's notes describe Chaos as "annoyingly omnipresent" and "the reason I have headaches across four timelines simultaneously."
+
+<strong>BEHAVIORAL NOTE:</strong> She keeps poking holes in things just to watch everyone scramble.
+
+<em>¯\\_(ツ)_/¯</em>`,
+    code: "SHESAMUSED"
+  },
+  {
+    id: "kronii",
+    title: "AVATAR: KRONII",
+    class: "SECRET",
+    cat: "PERSONNEL",
+    preview: "[AVATAR DOSSIER — CODE REQUIRED]",
+    content: `<strong>AVATAR:</strong> Kronii
+<strong>DOMAIN:</strong> Time
+<strong>TITLE:</strong> Warden of Time
+<strong>CORE STATUS:</strong> Merged into The Chronis
+
+Kronii governs the flow of all moments across all realities. She is Time itself — the tick of every clock, the aging of every star, the decay of every empire.
+
+Before The Chronis was formed, Kronii maintained the temporal integrity of the multiverse alone. Her Core — a fragment of Time's fundamental power — was the first to be offered to the convergence.
+
+Personality: Narcissistic (lovingly), deadpan, savage, perfectionist, perpetually tired.
+
+<em>"I control time, not your life choices."</em>`,
+    code: "WARDENOFTIME"
+  },
+];
+
+// ===== ENGINE =====
+const unlocked = JSON.parse(localStorage.getItem('chronis-dossier') || '[]');
+
+function tryCode() {
+  const input = document.getElementById('codeInput');
+  const msg = document.getElementById('codeMsg');
+  const val = input.value.trim().toUpperCase();
+  if (!val) return;
+
+  const entry = DOSSIER.find(d => d.code.toUpperCase() === val);
+  if (entry) {
+    if (unlocked.includes(entry.id)) {
+      msg.textContent = '> ENTRY ALREADY DECRYPTED';
+      msg.className = 'code-msg dupe';
+    } else {
+      unlocked.push(entry.id);
+      localStorage.setItem('chronis-dossier', JSON.stringify(unlocked));
+      msg.textContent = `> DECRYPTED: ${entry.title}`;
+      msg.className = 'code-msg success';
+      renderGrid();
+      updateProgress();
+    }
+  } else {
+    msg.textContent = '> ACCESS DENIED — INVALID CODE';
+    msg.className = 'code-msg fail';
+  }
+  input.value = '';
+  setTimeout(() => { msg.textContent = ''; msg.className = 'code-msg'; }, 4000);
+}
+
+document.getElementById('codeInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') tryCode();
+});
+
+function updateProgress() {
+  const total = DOSSIER.length;
+  const count = unlocked.filter(id => DOSSIER.some(d => d.id === id)).length;
+  document.getElementById('unlockCount').textContent = count;
+  document.getElementById('totalCount').textContent = total;
+  document.getElementById('progressFill').style.width = (count / total * 100) + '%';
+}
+
+let activeFilter = 'ALL';
+
+function renderFilters() {
+  const cats = ['ALL', ...new Set(DOSSIER.map(d => d.cat))];
+  const wrap = document.getElementById('filterTabs');
+  wrap.innerHTML = '';
+  cats.forEach(cat => {
+    const btn = document.createElement('button');
+    btn.className = 'filter-tab' + (cat === activeFilter ? ' active' : '');
+    btn.textContent = cat;
+    btn.onclick = () => { activeFilter = cat; renderFilters(); renderGrid(); };
+    wrap.appendChild(btn);
+  });
+}
+
+function renderGrid() {
+  const grid = document.getElementById('dosGrid');
+  grid.innerHTML = '';
+  const filtered = activeFilter === 'ALL' ? DOSSIER : DOSSIER.filter(d => d.cat === activeFilter);
+
+  filtered.forEach(entry => {
+    const isUnlocked = unlocked.includes(entry.id);
+    const card = document.createElement('div');
+    card.className = `dos-card ${isUnlocked ? 'unlocked' : 'locked'}`;
+
+    const classColor = `class-${entry.class.replace(' ', '-')}`;
+
+    card.innerHTML = `
+      <div class="dos-card-head">
+        <div class="dos-card-title">${isUnlocked ? entry.title : '██████████'}</div>
+        <span class="dos-class ${classColor}">${entry.class}</span>
+      </div>
+      <div class="dos-cat">${entry.cat}</div>
+      <div class="dos-preview">${isUnlocked ? entry.content.substring(0, 120).replace(/<[^>]*>/g, '') + '...' : entry.preview}</div>
+      ${!isUnlocked ? '<div class="dos-lock-icon">🔒</div>' : ''}
+    `;
+
+    if (isUnlocked) {
+      card.onclick = () => openModal(entry);
+    }
+
+    grid.appendChild(card);
+  });
+}
+
+function openModal(entry) {
+  const m = document.getElementById('dosModal');
+  const classColor = `class-${entry.class.replace(' ', '-')}`;
+  document.getElementById('modalClass').innerHTML = `<span class="${classColor}">${entry.class}</span>`;
+  document.getElementById('modalTitle').textContent = entry.title;
+  document.getElementById('modalCat').textContent = entry.cat;
+  document.getElementById('modalBody').innerHTML = entry.content;
+  m.classList.add('active');
+}
+
+function closeModal() {
+  document.getElementById('dosModal').classList.remove('active');
+}
+
+document.getElementById('dosModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('dosModal')) closeModal();
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+});
+
+// INIT
+renderFilters();
+renderGrid();
+updateProgress();
+</script>
+</body>
+</html>
